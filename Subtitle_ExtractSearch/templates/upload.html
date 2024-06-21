@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <h2 class="text-center mb-4">Upload Video</h2>
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Title</label>
+                {{ form.title }}
+                <small class="form-text text-muted">Enter a title for the video.</small>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.file.id_for_label }}">Video File</label>
+                {{ form.file }}
+                <small class="form-text text-muted">Select a video file to upload.</small>
+            </div>
+
+            <div class="progress m-1 mb-2" style="display: none;">
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="submitBtn">Submit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#submitBtn").click(function () {
+            var form = $("#uploadForm")[0];
+            var formData = new FormData(form);
+            var progressBar = $(".progress-bar");
+            var progressContainer = $(".progress");
+
+            $.ajax({
+                url: form.action,
+                type: "post",
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function (evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = (evt.loaded / evt.total) * 100;
+                            progressBar.width(percentComplete + "%");
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function (response) {
+                    // Handle success, e.g., show a success message
+                    console.log("Form submitted successfully");
+                    // Redirect to the home page
+                    window.location.href = '/';
+
+                },
+                error: function (xhr, status, error) {
+                    // Handle error, e.g., show an error message
+                    console.error("Error submitting form: ", error);
+                },
+                complete: function () {
+                    // Hide progress bar after completion
+                    progressContainer.hide();
+                }
+            });
+
+            // Show progress bar on form submission
+            progressContainer.show();
+        });
+    });
+</script>
+{% endblock %}

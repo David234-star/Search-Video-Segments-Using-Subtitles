@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <h2 class="text-center mb-4">Search Videos: <b>"{{title}}"</b></h2>
+        <form method="get">
+            <div class="form-group">
+                <label for="searchKeyword">Enter Keyword</label>
+                <input type="text" class="form-control" id="searchKeyword" name="keyword" value="{{ keyword }}">
+                {% comment %} {% csrf_token %} {% endcomment %}
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+</div>
+
+{% if results %}
+<h3 class="mt-4">Search Results for <b>"{{ keyword }}"</b> in Video</h3>
+<ul>
+    {% for result in results %}
+    <li class="mb-3">
+        <span class="mb-1">TimeLine <span class="badge bg-success fw-bold">{{ result.Timestamp.S }} seconds</span>:
+        </span>
+        <!-- <br> -->
+        <button class="btn btn-primary btn-sm mx-2" onclick="playVideo('{{ url }}', '{{ result.Timestamp.S }}');">Play
+            this timestamp</button>
+    </li>
+    {% endfor %}
+</ul>
+
+<p id="p_a"></p>
+<section>
+    <div class="container">
+        <div class="video_player" id="video_player">
+            <video id="video_d" preload="auto" class="main-video" controls>
+
+                <source id="video_d_1080" size="1080">
+            </video>
+        </div>
+    </div>
+</section>
+{% endif %}
+<script>
+    function convertTimeToSeconds(timeStr) {
+        let [hours, minutes, secondsMilliseconds] = timeStr.split(':');
+        let [seconds, milliseconds] = secondsMilliseconds.split(',');
+
+        let totalSeconds = (parseInt(hours, 10) * 3600) +
+            (parseInt(minutes, 10) * 60) +
+            parseInt(seconds, 10) +
+            (parseInt(milliseconds, 10) / 1000);
+
+        return totalSeconds - 1;
+    }
+
+    function playVideo(videoID, timestamp) {
+        var video = document.getElementById('video_d');
+        video.src = videoID;
+        let CurT = convertTimeToSeconds(timestamp);
+        video.currentTime = CurT;
+
+        var videoPlayerElement = document.getElementById('video_player');
+
+        if (videoPlayerElement.getBoundingClientRect().top < window.innerHeight) {
+            video.play();
+        } else {
+            video.onloadeddata = function () {
+                video.play();
+            }
+            videoPlayerElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>
+{% endblock %}
