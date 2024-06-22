@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'VideoParser_Project.settings')
 
 app = Celery('VideoParser_Project')
 app.conf.enable_utc = False  # Adjust based on your application's needs
-app.conf.update(timezone='Asia/Kolkata')
+app.conf.update(timezone='UTC')
 
 # Configure Celery using settings, optionally set namespace='CELERY'
 app.config_from_object(settings)
@@ -31,7 +31,6 @@ app.conf.beat_schedule = {
 }
 
 app.autodiscover_tasks()
-
 
 @app.task(bind=True)
 def debug_task(self):

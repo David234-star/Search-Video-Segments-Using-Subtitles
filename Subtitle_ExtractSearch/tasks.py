@@ -6,6 +6,7 @@ from django.conf import settings
 import boto3
 
 
+@shared_task
 def parse_time_range(time_range):
     start, end = time_range.split(' --> ')
     return start, end
@@ -18,7 +19,7 @@ def process_video(video_id):
         settings.MEDIA_ROOT, "uploads", f'video_{video_id}.mp4')
     output_path = os.path.join(
         settings.MEDIA_ROOT, "subtitles", f'subtitles_{video_id}.srt')
-    ccextractor_command = f'ccextractorwinfull {input_path} -o {output_path}'
+    ccextractor_command = f'D:\Downloads\ccextractor.0.85b-windows.binaries\ccextractorwinfull.exe {input_path} -o {output_path}'
     subprocess.run(ccextractor_command, shell=True)
     with open(output_path, 'r') as subtitle_file:
         subtitle_text = subtitle_file.read()
@@ -38,6 +39,7 @@ def process_video(video_id):
     return "done"
 
 
+@shared_task
 def store_subtitle_in_dynamodb(video_id, timestamp, subtitle, end_time):
     dynamodb = boto3.client('dynamodb', region_name='us-east-1')
     table_name = 'nosqlsubtitle_db'
